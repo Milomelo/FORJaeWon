@@ -1,0 +1,151 @@
+{{> /layout/header}}
+
+<!-- 컨테이너 시작 -->
+<div class="container mt-3">
+
+  <!-- 탭 시작 -->
+  <div class="tabbable-line">
+    <ul class="nav nav-tabs ">
+      <li class="active">
+        <a href="#tab_default_1" data-toggle="tab" class="active-tab">
+          인기순</a>
+      </li>
+      <li>
+        <a href="#tab_default_2" data-toggle="tab" class="active-tab">
+          최신순</a>
+      </li>
+    </ul>
+  </div>
+  <!-- 탭 끝 -->
+
+  <!-- 게시글 아이템 시작 -->
+
+  <div class="row d-flex justify-content-between" id="post-box">
+
+
+  </div>
+  <!-- 게시글 아이템 끝 -->
+
+  <!-- 페이징 시작 -->
+  <ul class="pagination modal-3">
+    <li><a href="#" class="prev"><i class="fa fa-chevron-left"></i></a></li>
+    <li><a href="#" class="next"><i class="fa fa-chevron-right"></i></a></li>
+  </ul>
+  <!-- 페이징 끝 -->
+
+</div>
+<!-- 컨테이너 끝 -->
+
+<script>
+
+  let page = 0;
+  $("#btn-next").click(() => {
+    page++;
+    $("#post-box").empty();
+    loading();
+  });
+  $("#btn-prev").click(() => {
+    page--;
+    $("#post-box").empty();
+    loading();
+  });
+  // 페이징 완료!!
+  function pagingDisable(responseParse) {
+    if (responseParse.data.first == true) {
+      $("#li-prev").addClass("disabled");
+      $("#li-next").removeClass("disabled");
+    } else if (responseParse.data.last == true) {
+      $("#li-next").addClass("disabled");
+      $("#li-prev").removeClass("disabled");
+    }
+  }
+  async function loading1() {
+    let response = await fetch(`/api/post?page=${page}`);
+    let responseParse = await response.json();
+    if (responseParse.code == 1) {
+      pagingDisable(responseParse); // 페이징 버튼 활성화 처리
+      //console.log(responseParse);
+      responseParse.data.content.forEach((post) => {
+        //console.log(post);
+        console.log(post);
+        $("#post-box").append(postItemRender(post));
+      });
+    } else {
+      alert("잘못된 요청입니다");
+    }
+  }
+
+
+
+  $("#btn-search").click(() => {
+    let keyword = $("#keyword").val();
+    search(keyword);
+  });
+
+  async function loading2() {
+    let response = await fetch(`/api/search`);
+    let responseParse = await response.json();
+    console.log(responseParse);
+    if (responseParse.code == 1) {
+      $("#board-box").empty();
+      for (post of responseParse.data) {
+        $("#board-box").append(postItemRender1(board));
+      }
+    }
+  }
+
+
+  async function search(keyword) {
+    //console.log(keyword);
+    let response = await fetch(`/api/search?keyword=${keyword}`);
+    let responseParse = await response.json();
+    console.log(responseParse);
+    console.log(keyword)
+    // CSR
+    if (responseParse.code == 1) {
+      $("#board-box").empty();
+      for (post of responseParse.data) {
+        $("#board-box").append(postItemRender1(board));
+      }
+    }
+  }
+
+  function postItemRender(post) {
+    return `
+    <div class="col-3 card">
+      <img class="card-img-top" src="image/Very_Peri.jpg" alt="Card image">
+      <div class="card-body">
+        <h4 class="card-title">${post.title}</h4>
+        <p class="card-text">${post.conet}</p>
+        <p>${post.createDate}</p>
+        <div class="card-profile">
+          <a href="#" class="card-link my-link"><img src="image/co  omon.jpg" class="rounded-circle card-img-profile"
+              alt="Card image"> by ${post.username}</a>
+          <span class="likey"><i class="fa-solid fa-heart"></i></span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function postItemRender1(board) {
+    return `
+    <div class="col-3 card">
+      <img class="card-img-top" src="image/Very_Peri.jpg" alt="Card image">
+      <div class="card-body">
+        <h4 class="card-title">${board.title}</h4>
+        <p class="card-text">${board.conet}</p>
+        <p>${board.createDate}</p>
+        <div class="card-profile">
+          <a href="#" class="card-link my-link"><img src="image/co  omon.jpg" class="rounded-circle card-img-profile"
+              alt="Card image"> by ${post.username}</a>
+          <span class="likey"><i class="fa-solid fa-heart"></i></span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  loading1();
+  loading2();
+</script>
+
+{{> /layout/footer}}
